@@ -1,1 +1,33 @@
-ffg
+"""
+URL configuration for peertestapp project.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/5.0/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+
+# Importing necessary modules from Django
+from django.contrib import admin
+from django.urls import path
+from django.urls import include
+
+# URL patterns for the project
+urlpatterns = [
+    # Route for the admin site
+    #path('admin/', admin.site.urls),
+
+    # Route for user-related API endpoints, included from 'authapp.urls'
+    path('api/v1/users/', include('authapp.urls')),
+
+    # Route for other API endpoints, included from 'gitlabapp.urls'
+    path('api/v1/', include('gitlabapp.urls')),
+]
