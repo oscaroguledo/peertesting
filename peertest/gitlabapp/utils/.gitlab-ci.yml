@@ -1,0 +1,450 @@
+stages:
+  - detect
+  - test
+
+variables:
+  DETECT_SCRIPT: "detect_and_test.sh"
+
+# Detect the project language
+detect_language:
+  stage: detect
+  script:
+    - echo "Detecting project language"
+    - chmod +x ./$DETECT_SCRIPT
+    - ./$DETECT_SCRIPT
+  artifacts:
+    reports:
+      dotenv: .env
+
+# Run Python tests
+test_python:
+  stage: test
+  script:
+    - echo "Running Python tests"
+    - python3 -m unittest discover -s "./test/"
+  
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
+
+  rules:
+    - if: '$LANGUAGE =~ /.*python.*/'
+
+# Run Node.js tests
+test_nodejs:
+  stage: test
+  script:
+    - echo "Running Node.js tests"
+    - npm test
+  rules:
+    - if: '$LANGUAGE =~ /.*nodejs.*/'
+
+# Run Java tests
+test_java:
+  stage: test
+  script:
+    - echo "Running Java tests"
+    - ./gradlew test
+
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
+  rules:
+    - if: '$LANGUAGE =~ /.*java.*/'
+
+# Run C tests
+test_c:
+  stage: test
+  script:
+    - echo "Running C tests"
+    - gcc -o test/test_program test/*.c
+    - ./test/test_program
+  rules:
+    - if: '$LANGUAGE =~ /.*c.*/'
+
+# Run C++ tests
+test_cpp:
+  stage: test
+  script:
+    - echo "Running C++ tests"
+    - g++ -o test/test_program test/*.cpp
+    - ./test/test_program
+  rules:
+    - if: '$LANGUAGE =~ /.*cpp.*/'
+
+# Run Go tests
+test_go:
+  stage: test
+  script:
+    - echo "Running Go tests"
+    - go test ./test/...
+    - go install gotest.tools/gotestsum@latest
+    - gotestsum --junitfile report.xml --format testname
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
+
+  rules:
+    - if: '$LANGUAGE =~ /.*go.*/'
+
+# Run Rust tests
+test_rust:
+  stage: test
+  script:
+    - echo "Running Rust tests"
+    - cargo test
+  rules:
+    - if: '$LANGUAGE =~ /.*rust.*/'
+
+# Run Ruby tests
+test_ruby:
+  ## Use https://github.com/sj26/rspec_junit_formatter to generate a JUnit report format XML file with rspec
+  image: ruby:3.0.4
+  stage: test
+  before_script:
+    - apt-get update -y && apt-get install -y bundler
+  script:
+    - echo "Running Ruby tests"
+    - bundle install
+    - bundle exec rspec --format progress --format RspecJunitFormatter --out rspec.xml
+  
+  artifacts:
+    when: always
+    paths:
+      - rspec.xml
+    reports:
+      junit: rspec.xml
+
+  rules:
+    - if: '$LANGUAGE =~ /.*ruby.*/'
+
+# Run PHP tests
+test_php:
+  stage: test
+  script:
+    - echo "Running PHP tests"
+    - ./vendor/bin/phpunit
+  rules:
+    - if: '$LANGUAGE =~ /.*php.*/'
+
+# Run Perl tests
+test_perl:
+  stage: test
+  script:
+    - echo "Running Perl tests"
+    - prove -lrv
+  rules:
+    - if: '$LANGUAGE =~ /.*perl.*/'
+
+# Run Swift tests
+test_swift:
+  stage: test
+  script:
+    - echo "Running Swift tests"
+    - swift test
+  rules:
+    - if: '$LANGUAGE =~ /.*swift.*/'
+
+# Additional languages
+#Run F# tests
+test_fsharp:
+  stage: test
+  script:
+    - echo "Running F# tests"
+    - dotnet test
+  rules:
+    - if: '$LANGUAGE =~ /.*fsharp.*/'
+# Run OCaml tests
+test_ocaml:
+  stage: test
+  script:
+    - echo "Running OCaml tests"
+    - dune runtest
+  rules:
+    - if: '$LANGUAGE =~ /.*ocaml.*/'
+# Run Gherkin tests
+test_gherkin:
+  stage: test
+  script:
+    - echo "Running Gherkin tests"
+    - cucumber
+  rules:
+    - if: '$LANGUAGE =~ /.*gherkin.*/'
+# Run R tests
+test_r:
+  stage: test
+  script:
+    - echo "Running R tests"
+    - Rscript test/test_script.R
+  rules:
+    - if: '$LANGUAGE =~ /.*r.*/'
+
+# Run TypeScript tests
+test_typescript:
+  stage: test
+  script:
+    - echo "Running TypeScript tests"
+    - npm test
+  rules:
+    - if: '$LANGUAGE =~ /.*typescript.*/'
+
+# Run Objective-C tests
+test_objective_c:
+  stage: test
+  script:
+    - echo "Running Objective-C tests"
+    - xcodebuild test
+  rules:
+    - if: '$LANGUAGE =~ /.*objective-c.*/'
+
+# Run SQL tests
+test_sql:
+  stage: test
+  script:
+    - echo "Running SQL tests"
+    - sqlcmd -i test/test_script.sql
+  rules:
+    - if: '$LANGUAGE =~ /.*sql.*/'
+
+# Run Groovy tests
+test_groovy:
+  stage: test
+  script:
+    - echo "Running Groovy tests"
+    - groovy test/test_script.groovy
+  rules:
+    - if: '$LANGUAGE =~ /.*groovy.*/'
+
+# Run Scala tests
+test_scala:
+  stage: test
+  script:
+    - echo "Running Scala tests"
+    - sbt test
+  rules:
+    - if: '$LANGUAGE =~ /.*scala.*/'
+
+# Run Dart tests
+test_dart:
+  stage: test
+  script:
+    - echo "Running Dart tests"
+    - dart test
+  rules:
+    - if: '$LANGUAGE =~ /.*dart.*/'
+
+# Run Lua tests
+test_lua:
+  stage: test
+  script:
+    - echo "Running Lua tests"
+    - lua test/test_script.lua
+  rules:
+    - if: '$LANGUAGE =~ /.*lua.*/'
+
+# Run Julia tests
+test_julia:
+  stage: test
+  script:
+    - echo "Running Julia tests"
+    - julia test/test_script.jl
+  rules:
+    - if: '$LANGUAGE =~ /.*julia.*/'
+
+# Run Haskell tests
+test_haskell:
+  stage: test
+  script:
+    - echo "Running Haskell tests"
+    - runhaskell test/test_script.hs
+  rules:
+    - if: '$LANGUAGE =~ /.*haskell.*/'
+
+# Run Shell Script tests
+test_shell:
+  stage: test
+  script:
+    - echo "Running Shell Script tests"
+    - bash test/test_script.sh
+  rules:
+    - if: '$LANGUAGE =~ /.*shell.*/'
+
+# Run PowerShell tests
+test_powershell:
+  stage: test
+  script:
+    - echo "Running PowerShell tests"
+    - pwsh test/test_script.ps1
+  rules:
+    - if: '$LANGUAGE =~ /.*powershell.*/'
+
+# Run Visual Basic tests
+test_vb:
+  stage: test
+  script:
+    - echo "Running Visual Basic tests"
+    - vbc /out:test/test_program.exe test/*.vb
+    - ./test/test_program.exe
+  rules:
+    - if: '$LANGUAGE =~ /.*vb.*/'
+
+# Run Assembly tests
+test_assembly:
+  stage: test
+  script:
+    - echo "Running Assembly tests"
+    - nasm -f elf64 -o test/test_program.o test/*.asm
+    - ld -o test/test_program test/test_program.o
+    - ./test/test_program
+  rules:
+    - if: '$LANGUAGE =~ /.*assembly.*/'
+
+# Run VHDL tests
+test_vhdl:
+  stage: test
+  script:
+    - echo "Running VHDL tests"
+    - ghdl -a test/*.vhd
+    - ghdl -e testbench
+    - ghdl -r testbench
+  rules:
+    - if: '$LANGUAGE =~ /.*vhdl.*/'
+
+# Run Verilog tests
+test_verilog:
+  stage: test
+  script:
+    - echo "Running Verilog tests"
+    - iverilog -o test/test_program test/*.v
+    - vvp test/test_program
+  rules:
+    - if: '$LANGUAGE =~ /.*verilog.*/'
+
+# Run Pascal tests
+test_pascal:
+  stage: test
+  script:
+    - echo "Running Pascal tests"
+    - fpc -o test/test_program test/*.pas
+    - ./test/test_program
+  rules:
+    - if: '$LANGUAGE =~ /.*pascal.*/'
+
+# Run Tcl tests
+test_tcl:
+  stage: test
+  script:
+    - echo "Running Tcl tests"
+    - tclsh test/test_script.tcl
+  rules:
+    - if: '$LANGUAGE =~ /.*tcl.*/'
+
+# Run Racket tests
+test_racket:
+  stage: test
+  script:
+    - echo "Running Racket tests"
+    - racket test/test_script.rkt
+  rules:
+    - if: '$LANGUAGE =~ /.*racket.*/'
+
+# Run CoffeeScript tests
+test_coffeescript:
+  stage: test
+  script:
+    - echo "Running CoffeeScript tests"
+    - coffee test/test_script.coffee
+  rules:
+    - if: '$LANGUAGE =~ /.*coffeescript.*/'
+
+# Run Haxe tests
+test_haxe:
+  stage: test
+  script:
+    - echo "Running Haxe tests"
+    - haxe test.hxml
+  rules:
+    - if: '$LANGUAGE =~ /.*haxe.*/'
+
+# Run AWK tests
+test_awk:
+  stage: test
+  script:
+    - echo "Running AWK tests"
+    - awk -f test/test_script.awk
+  rules:
+    - if: '$LANGUAGE =~ /.*awk.*/'
+
+# Run Nim tests
+test_nim:
+  stage: test
+  script:
+    - echo "Running Nim tests"
+    - nimble test
+  rules:
+    - if: '$LANGUAGE =~ /.*nim.*/'
+
+# Run Crystal tests
+test_crystal:
+  stage: test
+  script:
+    - echo "Running Crystal tests"
+    - crystal spec
+  rules:
+    - if: '$LANGUAGE =~ /.*crystal.*/'
+
+# Run Lisp tests
+test_lisp:
+  stage: test
+  script:
+    - echo "Running Lisp tests"
+    - sbcl --script test/test_script.lisp
+  rules:
+    - if: '$LANGUAGE =~ /.*lisp.*/'
+
+# Run Clojure tests
+test_clojure:
+  stage: test
+  script:
+    - echo "Running Clojure tests"
+    - clojure -M:test
+  rules:
+    - if: '$LANGUAGE =~ /.*clojure.*/'
+
+# Run Forth tests
+test_forth:
+  stage: test
+  script:
+    - echo "Running Forth tests"
+    - gforth test/test_script.fth
+  rules:
+    - if: '$LANGUAGE =~ /.*forth.*/'
+
+# Run Pike tests
+test_pike:
+  stage: test
+  script:
+    - echo "Running Pike tests"
+    - pike test/test_script.pike
+  rules:
+    - if: '$LANGUAGE =~ /.*pike.*/'
+
+# Run Zig tests
+test_zig:
+  stage: test
+  script:
+    - echo "Running Zig tests"
+    - zig test test/test_script.zig
+  rules:
+    - if: '$LANGUAGE =~ /.*zig.*/'
+
+# Fallback stage for no tests found
+test_none:
+  stage: test
+  script:
+    - echo "No tests found"
+  rules:
+    - if: '$LANGUAGE == "none"'
